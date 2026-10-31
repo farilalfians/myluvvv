@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kenangan Kita</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400;0,600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#1b0f16; --bg2:#2b1620; --gold:#e8c38a; --rose:#d49aa0; --text:#f6ecec; --muted:#c9b4bb;
+  color-scheme: dark;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  font-family:'Poppins',sans-serif; color:var(--text); overflow:hidden;
+  background:radial-gradient(circle at 50% 15%, var(--bg2), var(--bg1) 75%);
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  position:relative; height:100vh;
+}
+.heart{position:fixed; bottom:-10%; font-size:16px; color:var(--rose); opacity:.5; animation:float linear infinite; pointer-events:none; z-index:1;}
+@keyframes float{to{transform:translateY(-120vh) rotate(20deg); opacity:0;}}
+
+.progress{position:fixed; top:0; left:0; height:3px; background:var(--gold); z-index:30; transition:width .5s ease;}
+
+.stage{position:relative; height:100%; width:100%; z-index:5;}
+.step{
+  position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:28px; opacity:0; transition:opacity .7s ease;
+}
+.step.active{display:flex; opacity:1;}
+
+.step .label{font-size:12px; letter-spacing:4px; color:var(--gold); margin-bottom:18px; text-transform:uppercase;}
+.step .big{font-family:'Playfair Display',serif; font-style:italic; font-size:clamp(20px,4.2vw,36px); max-width:680px; line-height:1.55;}
+.step .sub{margin-top:16px; color:var(--muted); font-size:14px; max-width:520px; line-height:1.7;}
+
+.photo-card{
+  width:min(78vw,300px); aspect-ratio:3/4; border-radius:6px; overflow:hidden; position:relative;
+  box-shadow:0 20px 50px rgba(0,0,0,.5); background:#000; border:6px solid #fff6ec;
+}
+.photo-card img{width:100%; height:100%; object-fit:cover; display:block;}
+.photo-card .ph{width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:40px;
+  background:linear-gradient(135deg, var(--gold), var(--rose));}
+.photo-num{margin-top:20px; font-family:'Playfair Display',serif; font-style:italic; color:var(--gold); font-size:15px;}
+.photo-caption{margin-top:6px; color:var(--muted); font-size:13px; max-width:420px;}
+
+.video-wrap{width:min(90vw,640px);}
+.video-wrap video{width:100%; border-radius:10px; box-shadow:0 20px 60px rgba(0,0,0,.6); background:#000;}
+
+.nav{position:fixed; bottom:calc(26px + env(safe-area-inset-bottom,0px)); left:0; right:0; display:flex; justify-content:center; gap:14px; z-index:20;}
+.nav button{
+  padding:12px 30px; border-radius:40px; border:1px solid var(--gold); background:transparent; color:var(--gold);
+  font-size:13px; letter-spacing:2px; cursor:pointer; transition:.3s;
+}
+.nav button:hover{background:var(--gold); color:#1b0f16;}
+.nav button.ghost{border-color:rgba(232,195,138,.3); color:var(--muted);}
+.nav button.ghost:hover{background:rgba(232,195,138,.12); color:var(--text);}
+.nav button[disabled]{opacity:.25; pointer-events:none;}
+
+.counter{position:fixed; top:calc(16px + env(safe-area-inset-top,0px)); right:20px; font-size:12px; color:var(--muted); letter-spacing:2px; z-index:20;}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress" style="width:0%"></div>
+<div class="counter" id="counter"></div>
+<div class="stage" id="stage"></div>
+
+<div class="nav">
+  <button class="ghost" id="backBtn" onclick="go(-1)">← Kembali</button>
+  <button id="nextBtn" onclick="go(1)">Lanjut →</button>
+</div>
+
+<script>
+const steps = [
+  {type:'text', label:'Happy Birthday 🥳🥳', big:'"Di antara banyak cerita dalam hidupku, hadirmu adalah bagian yang paling ingin aku pertahankan."', sub:'lanjut sayangg 💐💐💐'},
+  {type:'text', label:'Myluvvv 🥰🥰🥰', big:'"Semoga dunia selalu memperlakukanmu dengan lembut, sebagaimana aku ingin selalu menjagamu."', sub:'kamu siap untuk melanjutkanya sayangg?'},
+  {type:'photo', num:1, src:'foto/1.jpeg', caption:'Kamu ingat foto ini? Foto dimana kita selalu datang ke stasiun dan menyempatkan untuk makan bareng disana.'},
+  {type:'photo', num:2, src:'foto/2.jpeg', caption:'Hari di awal kita masuk kuliah, Selalu susah cari tempat dimana kita untuk makann hhee.'},
+  {type:'photo', num:3, src:'foto/3.jpeg', caption:'Ini hari yang gaakan aku lupain, di hari pertama aku di rayakan oleh wanita tercantikk kesayanggkuu.'},
+  {type:'photo', num:4, src:'foto/4.jpeg', caption:'Ehh masih inget ga ini? Dulu kita punya rencana selalu ingin jadi couple goals lohh.'},
+  {type:'photo', num:5, src:'foto/5.jpeg', caption:'Kapan rencana nya terwujud hhehee, Kita lucuu yaa kalo selalu sama sama hheee.'},
+  {type:'photo', num:6, src:'foto/6.jpeg', caption:'Dan ini firstime kita menjelajah dan aku ingin selalu mengenalkanmu bahwa seru nya berpetualang.'},
+  {type:'photo', num:7, src:'foto/7.jpeg', caption:'Ternyata kamu juga suka berpetualang yaaa hhee.'},
+  {type:'photo', num:8, src:'foto/8.jpeg', caption:'Perjalanan kecil yang berkesan dan selalu kusimpan di dalam memori kecil ingatanku..'},
+  {type:'photo', num:9, src:'foto/9.jpeg', caption:'Hari itu dimana hari lahirmu aku selalu usahakan agar kamu terus bahagiaa.'},
+  {type:'photo', num:10, src:'foto/10.jpeg', caption:'Tapi di hari ini aku minta maaf sama kamu, Hanya ini yang bisa aku kasih untukmu sayangg semoga kamu bahagia yaa.'},
+  {type:'video', src:'video/1.mp4', caption:'Sehat sehat yaa sayanggg biar kita terus traveling bareng doain aku nya cepett kaya juga yaa hheee.'},
+];
+
+let idx = 0;
+const stage = document.getElementById('stage');
+const progress = document.getElementById('progress');
+const counter = document.getElementById('counter');
+const backBtn = document.getElementById('backBtn');
+const nextBtn = document.getElementById('nextBtn');
+
+function render(){
+  stage.innerHTML = '';
+  steps.forEach((s,i)=>{
+    const el = document.createElement('div');
+    el.className = 'step' + (i===idx?' active':'');
+    if(s.type==='text'){
+      el.innerHTML = '<div class="label">'+(s.label||'')+'</div><div class="big">'+s.big+'</div><div class="sub">'+(s.sub||'')+'</div>';
+    } else if(s.type==='photo'){
+      el.innerHTML = '<div class="photo-card">'+(s.src ? '<img src="'+s.src+'" alt="foto '+s.num+'">' : '<div class="ph">🤍</div>')+'</div>'+
+        '<div class="photo-num">Foto '+s.num+' / 10</div>'+
+        '<div class="photo-caption">'+(s.caption||'')+'</div>';
+    } else if(s.type==='video'){
+      el.innerHTML = '<div class="label">Kenangan Dalam Gerak</div>'+
+        '<div class="video-wrap"><video controls '+(s.src?('src="'+s.src+'"'):'')+'></video></div>'+
+        '<div class="photo-caption">'+(s.caption||'')+'</div>';
+    }
+    stage.appendChild(el);
+  });
+  progress.style.width = ((idx+1)/steps.length*100)+'%';
+  counter.textContent = (idx+1)+' / '+steps.length;
+  backBtn.disabled = idx===0;
+  nextBtn.textContent = idx===steps.length-1 ? 'Selesai ♥' : 'Lanjut →';
+}
+function go(dir){
+  const next = idx+dir;
+  if(next<0 || next>steps.length-1){
+    if(next>steps.length-1){ nextBtn.textContent='Kita harus selalu bersama ya ♥'; }
+    return;
+  }
+  idx = next;
+  render();
+}
+render();
+
+for(let i=0;i<14;i++){
+  const h = document.createElement('div');
+  h.className='heart';
+  h.textContent = Math.random()>.5 ? '♥' : '✦';
+  h.style.left = Math.random()*100+'%';
+  h.style.fontSize = (10+Math.random()*14)+'px';
+  h.style.animationDuration = (10+Math.random()*12)+'s';
+  h.style.animationDelay = (Math.random()*10)+'s';
+  document.body.appendChild(h);
+}
+</script>
+</body>
+</html>
